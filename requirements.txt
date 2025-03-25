@@ -3,4 +3,5 @@ numpy
 google-generativeai
 streamlit
 scikit-learn
--e .
+PyPDF2
+#-e .
