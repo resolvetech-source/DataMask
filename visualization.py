@@ -12,7 +12,7 @@ st.write("Upload a **text, PDF, or csv file**, select a role, and let AI mask se
 uploaded_file = st.file_uploader("Upload Files", type=['txt', 'pdf', 'csv'])
 
 # Select role
-role = st.selectbox("Select Role", ["HR", "IT", "Manager", "Finance", "Legal"])
+role = st.selectbox("Select Role", ["General","HR", "IT", "Manager", "Finance", "Legal"])
 st.write("You selected:", role)
 
 if uploaded_file and role:
