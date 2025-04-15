@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
 import os
-from utils import extract_text_from_file
-from data_masking import generate_masked_text
+from utils import extract_text_from_file, fetch_employee_details
+from data_masking import generate_masked_and_policy_text,generating_sql_query
 from PIL import Image
 # Load company logo (Make sure the logo file is in the same directory or provide the correct path)
-logo = Image.open("resolve_tech_solutions_logo.jpg")  # Replace with your actual logo file
+logo = Image.open("resolve_tech_solutions_logo.jpg")
 
 # Layout for top section with logo
 col1, col2 = st.columns([1, 4])
@@ -16,66 +16,31 @@ with col2:
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Data Masking"])
+page = st.sidebar.radio("Go to", ["Home", "Employee Lookup"])
 
 # Page Routing
 if page == "Home":
     st.write("Welcome to the Data Privacy Application!")
     st.write("Select an option from the sidebar.")
 
-elif page == "Data Masking":
-    st.subheader("Data Masking Tool")
-    st.write("Upload a document and apply masking.")
-    
-    uploaded_file = st.file_uploader("Upload a document", type=["txt", "pdf","csv"])
-    role = st.selectbox("Select Role", ["General","HR", "IT", "Manager", "Finance", "Legal"])
-    st.write("You selected:", role)
+elif page == "Employee Lookup":
+    st.subheader("Fetching Employee Records")
 
-    if uploaded_file and role:
-        text = extract_text_from_file(uploaded_file)
-        st.write("Uploaded text:")
-        st.write(text)
+    user_query = st.text_input("Enter your query")
+    role = st.selectbox("Select the Role",["General","HR","IT","Manager","Finance","Legal"])
 
-        if text:
-            st.subheader(" Processing with Gemini...")
-            masked_text = generate_masked_text(role, text)
+    if st.button("Fetch Employee Details"):
+        sql_query = generating_sql_query(user_query)
+        st.write("Generated SQL Query:",sql_query)
+        column_names,records = fetch_employee_details(sql_query)
+        if records:
+            masked_text = generate_masked_and_policy_text(role, column_names,records)
 
             st.subheader("Masked Output:")
-            st.text_area("Masked Text", value=masked_text, height=400, max_chars=None)
+            st.text_area("Masked Text", value = masked_text, height = 400 )
 
-            st.download_button(
-                label="Download Masked Text",
-                data=masked_text,
-                file_name="masked_text.txt",
-                mime="text/plain",
-            )
+            # st.subheader(f"{role} Policy Information")
+            # st.text_area("Generated Policy", value=policy_text,height=400)
         else:
-            st.error("Error:Unable to extract text from the uploaded file")
+            st.error("No matching employee records")
 
-# # File uploader
-# uploaded_file = st.file_uploader("Upload Files", type=['txt', 'pdf', 'csv'])
-
-# # Select role
-# role = st.selectbox("Select Role", ["General","HR", "IT", "Manager", "Finance", "Legal"])
-# st.write("You selected:", role)
-
-# if uploaded_file and role:
-#     text = extract_text_from_file(uploaded_file)
-#     st.write("Uploaded text:")
-#     st.write(text)
-
-#     if text:
-#         st.subheader(" Processing with Gemini...")
-#         masked_text = generate_masked_text(role, text)
-
-#         st.subheader("Masked Output:")
-#         st.text_area("Masked Text", value=masked_text, height=400, max_chars=None)
-
-#         st.download_button(
-#             label="Download Masked Text",
-#             data=masked_text,
-#             file_name="masked_text.txt",
-#             mime="text/plain",
-#         )
-#     else:
-#         st.error("Error:Unable to extract text from the uploaded file")
