@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from dotenv import load_dotenv
 from typing import Any
-from utils import call_qwen,fetch_tables
+from utils import call_qwen,fetch_tables, api_calling
 
 load_dotenv()
 
@@ -83,91 +83,92 @@ def generating_masking_prompt(role, column_names, records):
     return prompt
 
 
-# def generating_masking_prompt(role, column_names, records,masked_output=None):
-#   record_details = ""
-#   for record in records:
-#       record_details += "\n".join([f"{col}: {val}" for col, val in zip(column_names, record)])
-#       record_details += "\n\n"
+def generating_masking_prompt(role, column_names, records,masked_output=None):
+  record_details = ""
+  for record in records:
+      record_details += "\n".join([f"{col}: {val}" for col, val in zip(column_names, record)])
+      record_details += "\n\n"
 
-#   prompt = f"""
-#   You are an AI assistant for data privacy. Detect and mask sensitive data based on the user's role.
-#   **User Role:** {role}
-#   **Step 1 - Identify Role:**  
-#   - Analyze the record infer the user's role selected (e.g., HR, IT, Manager, Legal, Finance, etc.). 
-#   - The office email address should be visible to all role except General but the personal email address should be masked to all Role.
-#   - Mask the sensitive data using * using length of string.
-#   - Use the role to determine the masking rules for sensitive data.
-#   - If the role is not clear, make an educated guess based on the text.  
+  prompt = f"""
+  You are an AI assistant for data privacy. Detect and mask sensitive data based on the user's role.
+  **User Role:** {role}
+  **Step 1 - Identify Role:**  
+  - Analyze the record infer the user's role selected (e.g., HR, IT, Manager, Legal, Finance, etc.). 
+  - The office email address should be visible to all role except General but the personal email address should be masked to all Role.
+  - Mask the sensitive data using * using length of string.
+  - Use the role to determine the masking rules for sensitive data.
+  - If the role is not clear, make an educated guess based on the text.  
  
-#   **Input Document:**
-#   {records}
+  **Input Document:**
+  {records}
 
-#   **Context:**
-#   {record_details}
+  **Context:**
+  {record_details}
 
-#   **Masked Output:**
-#   (Censor the sensitive data according to the role.)
+  **Masked Output:**
+  (Censor the sensitive data according to the role.)
 
-#   **Step 2 - {role} Policy:**  
-#   - Explain why each field was masked (mention the field name) but dont show the data.
-#   - Explain why it was important to mask the data. 
-#   - Use role-based access logic.
-#   - Use bullet points.
-#   """
-#   # """
-#   # prompt2 = f"""
-#   #   You are an AI assistant for data privacy
-#   #   Based on **role-based access control**, explain why certain fields were masked.
-#   #   **User Role:** {role}
-#   #   **Masked Output (already generated):**
-#   #   {masked_output if masked_output else "None provided"}
-#   #   **Step 2 - Generate Policy Explanation:**
-#   #   - Explain why masking is required for each type, considering privacy and access control.
-#   #   - Please dont show the data while explaining.
-#   #   - Use bullet points and mention specific field names.
-#   #   - Keep the explanation practical and not generic.
+  **Step 2 - {role} Policy:**  
+  - Explain why each field was masked (mention the field name) without showing the data.
+  - Explain why it was important to mask the data. 
+  - Use role-based access logic.
+  - Use bullet points.
+  """
+  # """
+  # prompt2 = f"""
+  #   You are an AI assistant for data privacy
+  #   Based on **role-based access control**, explain why certain fields were masked.
+  #   **User Role:** {role}
+  #   **Masked Output (already generated):**
+  #   {masked_output if masked_output else "None provided"}
+  #   **Step 2 - Generate Policy Explanation:**
+  #   - Explain why masking is required for each type, considering privacy and access control.
+  #   - Please dont show the data while explaining.
+  #   - Use bullet points and mention specific field names.
+  #   - Keep the explanation practical and not generic.
 
-#   #   **Context:**
-#   #   {record_details}
+  #   **Context:**
+  #   {record_details}
 
-#   #   Example Output:
-#   #   - **Bank Account**: Masked because this role doesn't require access to financial data.
-#   #   - **Aadhar Card**: Masked due to privacy laws restricting exposure of national ID numbers.
-#   #   - **Phone Number**: Only HR is allowed to see employee contact details.
-#   #   """
+  #   Example Output:
+  #   - **Bank Account**: Masked because this role doesn't require access to financial data.
+  #   - **Aadhar Card**: Masked due to privacy laws restricting exposure of national ID numbers.
+  #   - **Phone Number**: Only HR is allowed to see employee contact details.
+
   
-#   return prompt
+  return prompt
+
+def generate_sql_query_using_prompt(prompt, tables):
+  
+  model = api_calling(API_KEY)
+  response = model.generate_content(prompt)
+  print(response)
+  sql_query = response.text.strip()
+  return sql_query
 
 # def generate_sql_query_using_prompt(prompt, tables):
   
-#   model = api_calling(API_KEY)
-#   response = model.generate_content(prompt)
-#   print(response)
-#   sql_query = response.text.strip()
-#   return sql_query
-def generate_sql_query_using_prompt(prompt, tables):
-  
-  sql_query = call_qwen(prompt)
-  queries = [q.strip() for q in sql_query.split(';') if q.strip()]
-  if not queries:
-    raise ValueError("No valid SQL query generated by Qwen.")
-  return queries[0]
-
-def generate_masked_and_policy_text(role,columns_names, records):
-
-  response = generating_masking_prompt(role, columns_names,records)
-  masked_text = call_qwen(response)
-  return masked_text
+#   sql_query = call_qwen(prompt)
+#   queries = [q.strip() for q in sql_query.split(';') if q.strip()]
+#   if not queries:
+#     raise ValueError("No valid SQL query generated by Qwen.")
+#   return queries[0]
 
 # def generate_masked_and_policy_text(role,columns_names, records):
 
-#   masked_output = generating_masking_prompt(role, columns_names,records)
-#   model = api_calling(API_KEY)
-
-#   response1 = model.generate_content(masked_output)
-#   masked_text =response1.text
-
-#   # response2 = model.generate_content(policy_prompt)
-#   # policy_text = response2.text
-
+#   response = generating_masking_prompt(role, columns_names,records)
+#   masked_text = call_qwen(response)
 #   return masked_text
+
+def generate_masked_and_policy_text(role,columns_names, records):
+
+  masked_output = generating_masking_prompt(role, columns_names,records)
+  model = api_calling(API_KEY)
+
+  response1 = model.generate_content(masked_output)
+  masked_text =response1.text
+
+  # response2 = model.generate_content(policy_prompt)
+  # policy_text = response2.text
+
+  return masked_text

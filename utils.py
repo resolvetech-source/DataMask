@@ -53,11 +53,11 @@ def fetch_employee_details(sql_query):
   connection.close()
   return column_names,records
 
-# def api_calling(api_key):
-#   genai.configure(api_key  =api_key)
+def api_calling(api_key):
+  genai.configure(api_key  =api_key)
 
-#   model = genai.GenerativeModel("gemini-1.5-pro-002")
-#   return model
+  model = genai.GenerativeModel("gemini-1.5-pro-002")
+  return model
 
 def call_qwen(prompt):
   url = "http://localhost:8000/completion"

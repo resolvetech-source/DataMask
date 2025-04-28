@@ -17,8 +17,8 @@ def get_requirements(file_path:str) ->List[str]:
 setup(
 name = 'DataMasking',
 version = '0.0.1',
-author = 'Ankita',
-author_email = 'ankpillay@gmail.com',
+author = 'ResolveTech',## Edit this
+author_email = 'Ankita.Pillayresolvetech.com', ##edit this
 packages = find_packages(),
 install_requires = get_requirements('requirements.txt')
 )
