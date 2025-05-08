@@ -9,7 +9,7 @@ load_dotenv()
 
 API_KEY =  os.getenv("API_KEY")
 def generating_sql_query(user_query):
-
+  
   tables, table_columns = fetch_tables()
   print(tables)
   #Convert table names into a string for AI reference
