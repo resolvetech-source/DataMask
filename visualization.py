@@ -27,7 +27,7 @@ elif page == "Employee Lookup":
     st.subheader("Fetching Employee Records")
 
     user_query = st.text_input("Enter your query")
-    role = st.selectbox("Select the Role",["General","HR","IT","Manager","Finance","Legal"])
+    role = st.selectbox("Select the Role",["General","HR","IT","Manager","Finance","Legal","Admin"])
 
     if st.button("Fetch Employee Details"):
         sql_query = generating_sql_query(user_query)
